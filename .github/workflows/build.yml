@@ -8,7 +8,7 @@ on:
 env:
   # Use the GitHub repository owner and name as the image name
   REGISTRY: ghcr.io
-  IMAGE_NAME: base
+  IMAGE_NAME: cs341-illinois/base
 
 jobs:
   build:
