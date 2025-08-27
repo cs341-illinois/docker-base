@@ -8,6 +8,15 @@ COPY apt_pins /etc/apt/preferences.d/build_tools_pins
 # Install all packages, create symlinks, and clean up in a single layer
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
+      software-properties-common \
+      wget \
+      bzip2 \
+      iproute2 \
+      libncurses-dev \
+      libncurses6 \
+      rpcbind \
+      git \
+      strace \
       python3-pip \
       python3.12 \
       cmake \
