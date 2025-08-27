@@ -55,6 +55,11 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}-${{ matrix.arch }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          push: false
+          load: true
+
+      - name: Push the architecture-specific image
+        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}-${{ matrix.arch }}
 
   push-manifest:
     name: Push multi-arch manifest
@@ -79,9 +84,3 @@ jobs:
             --amend ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}-amd64 \
             --amend ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}-arm64
           docker manifest push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-
-          # Create and push a multi-arch manifest tagged with the commit SHA
-          docker manifest create ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
-            --amend ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}-amd64 \
-            --amend ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}-arm64
-          docker manifest push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
