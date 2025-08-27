@@ -50,7 +50,6 @@ jobs:
         with:
           context: .
           platforms: ${{ matrix.platform }}
-          push: true
           # Tag each arch-specific image with the commit SHA and architecture
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}-${{ matrix.arch }}
           cache-from: type=gha
