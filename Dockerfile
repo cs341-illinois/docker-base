@@ -9,6 +9,7 @@ COPY apt_pins /etc/apt/preferences.d/build_tools_pins
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       software-properties-common \
+      build-essential \
       wget \
       bzip2 \
       iproute2 \
