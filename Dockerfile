@@ -8,7 +8,7 @@ COPY apt_pins /etc/apt/preferences.d/build_tools_pins
 # Install all packages, create symlinks, and clean up in a single layer
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-      # ... (all your packages) ...
+      python3-pip \
       python3.12 \
       cmake \
       clang-18 \
