@@ -1,13 +1,32 @@
-name: Build and Push Docker Images
+name: Build and Push Multi-Arch Docker Images
 
 on:
   push:
     branches:
       - main
 
+env:
+  # Use the GitHub repository owner and name as the image name
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
 jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
+  build:
+    name: Build for ${{ matrix.arch }}
+    # This matrix strategy creates a job for each architecture
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            platform: linux/amd64
+            runner: ubuntu-latest
+          - arch: arm64
+            platform: linux/arm64
+            runner: ubuntu-24.04-arm
+    
+    # Run each job on its specified native runner
+    runs-on: ${{ matrix.runner }}
     permissions:
       packages: write
       contents: read
@@ -15,16 +34,54 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-    
+
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and Push Docker Image
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push architecture-specific image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: ${{ matrix.platform }}
+          push: true
+          # Tag each arch-specific image with the commit SHA and architecture
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}-${{ matrix.arch }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  push-manifest:
+    name: Push multi-arch manifest
+    # This job runs only after all 'build' jobs have succeeded
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create and push manifest
         run: |
-          docker pull ghcr.io/cs341-illinois/base:latest || true
-          docker build -t ghcr.io/cs341-illinois/base:latest .
-          docker push ghcr.io/cs341-illinois/base:latest
+          # Create and push a multi-arch manifest tagged with 'latest'
+          docker manifest create ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
+            --amend ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}-amd64 \
+            --amend ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}-arm64
+          docker manifest push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+          # Create and push a multi-arch manifest tagged with the commit SHA
+          docker manifest create ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            --amend ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}-amd64 \
+            --amend ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}-arm64
+          docker manifest push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
