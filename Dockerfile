@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 ubuntu:24.04
+FROM ubuntu:24.04
 
 # Add the pinning configuration file
 COPY apt_pins /etc/apt/preferences.d/build_tools_pins
