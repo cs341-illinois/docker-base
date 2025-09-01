@@ -1,4 +1,4 @@
-FROM jenkins/jenkins:2.521
+FROM jenkins/jenkins:2.525
 USER root
 RUN apt-get -qq update \
     && apt-get -qq -y install \
