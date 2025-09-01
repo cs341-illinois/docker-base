@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - 'jenkins.Dockerfile'
+      - '.github/workflows/jenkins.yml'
 
 env:
   # Use the GitHub repository owner and name as the image name
