@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'jenkins.Dockerfile'
+      - '.github/workflows/jenkins.yml'
 
 env:
   # Use the GitHub repository owner and name as the image name
