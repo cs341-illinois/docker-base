@@ -48,3 +48,4 @@ RUN apt-get update && \
 
 # Allow grader to find clang binary
 RUN ln -s /usr/bin/clang-18 /usr/bin/clang || true
+RUN ln -s /usr/bin/clang++-18 /usr/bin/clang++ || true
