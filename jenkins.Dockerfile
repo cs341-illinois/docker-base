@@ -1,4 +1,4 @@
-FROM jenkins/jenkins:2.525
+FROM jenkins/jenkins:2.543
 ENV JAVA_OPTS="-Dorg.apache.commons.jelly.tags.fmt.timeZone=America/Chicago"
 USER root
 RUN apt-get -qq update \
